@@ -59,12 +59,20 @@ router.post('/', (req, res) => {
             username: req.body.username,
             email: req.body.email,
             password: req.body.password
+        }).then(dbUserData => { // server access to user's id and username
+            req.session.save(() => {
+                req.session.user_id = dbUserData.id;
+                req.session.username = dbUserData.username;
+                req.session.loggedIn = true;
+
+                res.json(dbUserData);
+            });
         })
-        .then(dbUserData => res.json(dbUserData))
-        .catch(err => {
-            console.log(err);
-            res.status(500).json(err);
-        });
+        // .then(dbUserData => res.json(dbUserData))
+        // .catch(err => {
+        //     console.log(err);
+        //     res.status(500).json(err);
+        // });
 });
 
 router.post('/login', (req, res) => {
@@ -86,7 +94,13 @@ router.post('/login', (req, res) => {
             return;
         }
 
-        res.json({ user: dbUserData, message: 'You are now logged in!' });
+        req.session.save(() => { //create sessions
+            req.session.user_id = dbUserData.id;
+            req.session.username = dbUserData.username;
+            req.session.loggedIn = true;
+
+            res.json({ user: dbUserData, message: 'You are now logged in!' });
+        });
     });
 });
 
@@ -131,5 +145,7 @@ router.delete('/:id', (req, res) => {
             res.status(500).json(err);
         });
 });
+
+
 
 module.exports = router;
