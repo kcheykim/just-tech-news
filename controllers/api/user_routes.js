@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { User, Post, Vote } = require('../../models');
+const { User, Post, Comment, Vote } = require('../../models');
 
 // get all users
 router.get('/', (req, res) => {
@@ -23,7 +23,6 @@ router.get('/:id', (req, res) => {
                     model: Post,
                     attributes: ['id', 'title', 'post_url', 'created_at']
                 },
-                // include the Comment model here:
                 {
                     model: Comment,
                     attributes: ['id', 'comment_text', 'created_at'],
@@ -56,21 +55,23 @@ router.get('/:id', (req, res) => {
 router.post('/', (req, res) => {
     // expects {username: 'Lernantino', email: 'lernantino@gmail.com', password: 'password1234'}
     User.create({
-        username: req.body.username,
-        email: req.body.email,
-        password: req.body.password
-    }).then(dbUserData => { // server access to user's id and username
-        req.session.save(() => {
-            req.session.user_id = dbUserData.id;
-            req.session.username = dbUserData.username;
-            req.session.loggedIn = true;
+            username: req.body.username,
+            email: req.body.email,
+            password: req.body.password
+        })
+        .then(dbUserData => {
+            req.session.save(() => {
+                req.session.user_id = dbUserData.id;
+                req.session.username = dbUserData.username;
+                req.session.loggedIn = true;
 
-            res.json(dbUserData);
-        }); // .then(dbUserData => res.json(dbUserData))
-    }).catch(err => {
-        console.log(err);
-        res.status(500).json(err);
-    });
+                res.json(dbUserData);
+            });
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json(err);
+        });
 });
 
 router.post('/login', (req, res) => {
@@ -92,7 +93,7 @@ router.post('/login', (req, res) => {
             return;
         }
 
-        req.session.save(() => { //create sessions
+        req.session.save(() => {
             req.session.user_id = dbUserData.id;
             req.session.username = dbUserData.username;
             req.session.loggedIn = true;
@@ -123,7 +124,7 @@ router.put('/:id', (req, res) => {
             }
         })
         .then(dbUserData => {
-            if (!dbUserData[0]) {
+            if (!dbUserData) {
                 res.status(404).json({ message: 'No user found with this id' });
                 return;
             }
@@ -153,7 +154,5 @@ router.delete('/:id', (req, res) => {
             res.status(500).json(err);
         });
 });
-
-
 
 module.exports = router;
