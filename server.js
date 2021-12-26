@@ -8,6 +8,8 @@ const routes = require('./controllers/'); //changing routes to controller
 
 const session = require('express-session');
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
+const helpers = require('./utils/helpers');
+const hbs = exphbs.create({ helpers });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -22,7 +24,7 @@ const sess = {
 
 app.use(session(sess)); //session middleware
 
-const hbs = exphbs.create({});
+
 
 app.use(express.json()); //middlewares
 app.use(express.urlencoded({ extended: true }));
